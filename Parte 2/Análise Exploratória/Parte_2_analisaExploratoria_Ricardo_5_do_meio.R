@@ -10,6 +10,9 @@
 #---------------------#
 
 # Age
+nossoDiabetes <- diabetes[,-1]
+nossoDiabetes
+
 par(mfrow=c(2,1))
 hist(nossoDiabetes$age) ## Aproxima-se da distribuição normal, contudo do lado esquedo apresenta
                         ## um crescimento bastante mais acentuado que do lado direito.
@@ -86,8 +89,10 @@ qqline(nossoDiabetes$weight, col = 2) ## Do gráfico resultante podemos ver que a
 
 ### Variável Binária:
 par(mfrow=c(1,1))
-nossoDiabetes$diabetesB <- rep('no',403)
-nossoDiabetes$diabetesB[nossoDiabetes$glyhb > 7]='yes'
+nossoDiabetes$diabetesB <- rep(NA,403)
+nossoDiabetes$diabetesB[nossoDiabetes$glyhb > 7]=1
+nossoDiabetes$diabetesB[nossoDiabetes$glyhb <= 7]=0
+
 nossoDiabetes$diabetesB <- as.factor(nossoDiabetes$diabetesB)
 
 # Age
@@ -108,15 +113,22 @@ boxplot(nossoDiabetes$glyhb~nossoDiabetes$frame) ## não parece afetar praticamen
 
 # Gender
 table(nossoDiabetes$diabetesB, nossoDiabetes$gender) ## Na tabela podemos verificar que 18.2% dos
-26/143                                               ## homens do dataset possuem diabetes. Já nas 
-34/200                                               ## mulheres a percentagem é de 17%. Tendo isto
-                                                     ## conta o género parece não afetar
+26/162 #1 em homens                                               ## homens do dataset possuem diabetes. Já nas 
+34/228  #1 em mulheres                                             ## mulheres a percentagem é de 17%. Tendo isto
 
+136/(136+194) #homens em 0                                                     ## conta o género parece não afetar
+26/(26+34) #homens em 1
 
 # Frame
 table(nossoDiabetes$diabetesB, nossoDiabetes$frame) ## Na tabela podemos verificar que quanto maior
-9/95                                                ## é o frame, mais incidências de diabetes 
-26/158                                              ## são registadas. Parece portanto afetar
-23/80                                               
+9/102 #1 em small                                                ## é o frame, mais incidências de diabetes 
+26/178 #1 em medium                                              ## são registadas. Parece portanto afetar
+23/99 #1 em large
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+93/(93+152+76) #small em 0
+152/(93+152+76) #medium em 0
+
+9/(9+26+23) #small em 1
+26/(9+26+23) #medium em 1
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
