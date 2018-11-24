@@ -1,0 +1,24 @@
+variaveis que mais afetam com o regsubsets:
+
+stab.glu
+chol
+time.ppn
+genderfemale
+age
+weight
+hip
+hdl
+bp.1s
+framelarge
+framemedium
+ratio
+waist
+locationLouisa
+height
+bp.1d
+
+
+//deviamos definir funcao para analisar melhores modelos
+consoante a taxa de erro (talvez a mais importante)
+e a taxa de falsos tanto positivos como negativos (devia penalizar 
+bastante os valores baixos)
