@@ -2,6 +2,15 @@
 ######MINHA PARTE############
 #############################
 
+## Gerar a variável binária que indica se tem ou não diabetes
+diabetesB <- rep(NA,403)
+diabetesB[diabetes$glyhb > 7]=1
+diabetesB[diabetes$glyhb <= 7]=0
+# por como fator (é qualitativa)
+diabetesB <- factor(diabetesB)
+diabetes <-  diabetes[,-1]
+
+
 ###TESTE À NORMALIDADE
 
 par(mfrow=c(2,1))
@@ -49,8 +58,8 @@ qqnorm(valoresNormal)
 qqline(valoresNormal, col = 2)
 qqnorm(nossoDiabetes$waist)
 qqline(nossoDiabetes$waist, col = 2) ##do grafico do teste da normal vemos que
-##a variavel se afasta muito e não parece normalmente distribuida (no meio 
-## até se comporta bem, mas nos extremos começa a afastar muito embora
+##a variavel nao se afasta muito e parece normalmente distribuida (no meio 
+## até se comporta bem, mas nos extremos começa a afastar um pouco embora
 ## aparenta afastar-se menosdo que o seguinte, nomeadamente no extremo superior)
 
 
@@ -101,7 +110,7 @@ par(mfrow=c(1,1))
 qqnorm(nossoDiabetes$bp.1d)
 qqline(nossoDiabetes$bp.1d, col = 2) ##do grafico do teste da normal vemos que
 ##a variavel se afasta um pouco, mas não muito pelo que não conseguimos
-## concluir nada em concreto
+## concluir nada em concreto (aparenta ser normal)
 
 
 #####TESTE À INFLUENCIA
@@ -115,11 +124,11 @@ nossoDiabetes$diabetesB <- as.factor(nossoDiabetes$diabetesB)
 summary(nossoDiabetes$diabetesB)
 boxplot(nossoDiabetes$time.ppn~nossoDiabetes$diabetesB) ##não parece afetar a 
 ##variavel binaria
-boxplot(nossoDiabetes$waist~nossoDiabetes$diabetesB) ##nao parece afetar muito
-boxplot(nossoDiabetes$hip~nossoDiabetes$diabetesB) ##nao parece afetar muito
+boxplot(nossoDiabetes$waist~nossoDiabetes$diabetesB) #parece afetar ligeiramente
+boxplot(nossoDiabetes$hip~nossoDiabetes$diabetesB) ##parece afetar ligeiramente
 boxplot(nossoDiabetes$bp.1s~nossoDiabetes$diabetesB) ##parece afetar mais, mas 
 ## nao muito
-boxplot(nossoDiabetes$bp.1d~nossoDiabetes$diabetesB) ##nao parece afetar (mas 
+boxplot(nossoDiabetes$bp.1d~nossoDiabetes$diabetesB) ##parece afetar ligeiramente (mas 
 ## parece afetar mais do que a primeira, menos do que as restantes)
 
 
@@ -136,3 +145,4 @@ plot(nossoDiabetes$glyhb ~ nossoDiabetes$bp.1s, type = "p")##parece afetar com
 abline(lm(nossoDiabetes$glyhb ~ nossoDiabetes$bp.1s)) ##confirma
 plot(nossoDiabetes$glyhb ~ nossoDiabetes$bp.1d, type = "p")##nao parece afetar
 abline(lm(nossoDiabetes$glyhb ~ nossoDiabetes$bp.1d)) ##tendencia constante
+
