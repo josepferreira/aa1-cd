@@ -1,0 +1,13 @@
+TAREFAS::
+
+
+->Selecionar as mais importantes (each one of them)
+->
+1 lm -> Peixoto
+2  glm > Carlos
+3  lda/qda/knn -> Peixoto
+   
+->
+->
+->
+->
