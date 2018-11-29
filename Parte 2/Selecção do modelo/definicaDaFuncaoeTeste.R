@@ -1,99 +1,31 @@
-library(leaps)
-#########so para ver############
-teste <- regsubsets(diabetesB~.-glyhb-bp.2s-bp.2d, nvmax = 20, data=nossoDiabetes)
-summary(teste)
-
-treino = sample(403,220) #selecionar amostra sem reposição
-teste = nossoDiabetes$diabetesB[-treino]
-length(teste)
-treino
-
-library(MASS)
-lda.fit=lda(diabetesB~stab.glu
-            +chol
-            +time.ppn
-            +gender,data=nossoDiabetes,subset=treino)
-lda.fit
-plot(lda.fit)
-lda.pred=predict(lda.fit, nossoDiabetes[-treino,])
-names(lda.pred)
-lda.class=lda.pred$class
-table(lda.class,teste) ##total = 182
-mean(lda.class==teste, na.rm = TRUE) ##aprox 92%
-##no entanto apenas tem 60% de acerto em 1
-sum(lda.pred$posterior[,1]>=.5, na.rm=TRUE)
-sum(lda.pred$posterior[,1]<.5, na.rm=TRUE)
-
-resultados = rep(NA,183)
-resultados[lda.pred$posterior[,1]>.99] = 0
-resultados[lda.pred$posterior[,1]<=.99] = 1
-
-table(resultados,teste) ##com este o acerto fica a 91%
-## e de 1 passa a 73%. 0 passa a 95%
-mean(teste==resultados,na.rm=TRUE)
-
-summary(lda.pred)
-summary(lda.pred$x)
-summary(lda.pred$posterior)
-summary(lda.pred$class)
-
-View(lda.pred)
-
-
-qda.fit=qda(diabetesB~stab.glu
-            +chol
-            +time.ppn
-            +gender,data=nossoDiabetes,subset=treino)
-qda.fit
-plot(qda.fit)
-qda.pred=predict(qda.fit, nossoDiabetes[-treino,])
-names(qda.pred)
-qda.class=qda.pred$class
-table(qda.class,teste) ##total = 182
-mean(qda.class==teste, na.rm = TRUE) ##aprox 92,3%
-##no entanto apenas tem 63% de acerto em 1
-sum(qda.pred$posterior[,1]>=.5, na.rm=TRUE)
-sum(qda.pred$posterior[,1]<.5, na.rm=TRUE)
-
-sum(qda.pred$posterior[,1]<.95, na.rm=TRUE)
-
-
-qda.pred$posterior[1:20,1]
-qda.class[1:20]
-
-resultados = rep(NA,183)
-resultados[qda.pred$posterior[,1]>.82] = 0
-resultados[qda.pred$posterior[,1]<=.82] = 1
-
-mT = melhorThreshold(0,1,0.2,qda.pred$posterior,teste)
-mT = melhorThreshold(0,1,0.01,qda.pred$posterior,teste)
-
-
-table(resultados,teste) ##com este o acerto fica a 91%
-## e de 1 passa a 70%. 0 passa a 95%
-
-mean(teste==resultados,na.rm=TRUE)
-
-summary(lda.pred)
-summary(lda.pred$x)
-summary(lda.pred$posterior)
-summary(lda.pred$class)
-
-View(lda.pred)
-
-melhorThreshold <- function(inferior,superior,delta, fit, teste){
-  num = ((superior - inferior) / delta) + 1
+graficoThreshold <- function(inferior,superior,delta, fit, teste){
+  num = ((superior - inferior) / delta) + 2
   aux = 0
   auxT = 0
   comeco = inferior
+  v = rep(0,num)
+  t = rep(0,num)
+  fp = rep(0,num)
+  fn = rep(0,num)
+  
   for(a in 1: num){
     comeco = inferior + ((a-1)*delta)
     resultados = rep(NA,183)
-    resultados[fit[,1]>comeco] = 0
-    resultados[fit[,1]<=comeco] = 1
+    resultados[fit<=comeco] = 0
+    resultados[fit>comeco] = 1
     
+    v[a] = comeco
     mediaAux = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
     ##algo diferente tendo em conta aquilo q disse na analise
+    t[a] = mediaAux
+    
+    condicaoT <- resultados == teste
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
+    fp[a] = mediaAux
+    
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
+    fn[a] = mediaAux
+    
     
     if(mediaAux > aux){
       aux = mediaAux
@@ -101,6 +33,139 @@ melhorThreshold <- function(inferior,superior,delta, fit, teste){
     }
     
   }
+  estrutura <- data.frame(v,t,fp,fn)
+}
+
+melhorThreshold <- function(inferior,superior,delta, fit, teste){
+  num = ((superior - inferior) / delta) + 2
+  acerto = 0
+  valor = -1
+  comeco = inferior
   
-  resultado = auxT
+  for(a in 1: num){
+    comeco = inferior + ((a-1)*delta)
+    resultados = rep(NA,183)
+    resultados[fit<=comeco] = 0
+    resultados[fit>comeco] = 1
+    condicaoT <- resultados == teste
+    
+    mediaAuxT = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+    ##algo diferente tendo em conta aquilo q disse na analise
+    if(mediaAuxT >= 0.65){
+      mediaAuxP = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
+      
+      if(mediaAuxP >= 0.65){
+        mediaAuxN = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
+        
+        if(mediaAuxN >= 0.65){
+          mediaAux = (2*mediaAuxT) + mediaAuxP + mediaAuxN ##aqui pode-se
+          ##truncar os valores para x casas decimais
+          
+          if(mediaAux > acerto){
+            acerto = mediaAux
+            valor = comeco
+          }
+          
+        }
+        
+      }
+    }
+    
+  }
+  resultados = rep(NA,183)
+  resultados[fit<=valor] = 0
+  resultados[fit>valor] = 1
+  condicaoT <- resultados == teste
+  
+  acertoT = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+  
+  acertoN = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
+  
+  acertoP = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
+  
+  acerto = acerto / 4
+  estrutura <- data.frame(valor, acertoT, acertoN, acertoP,acerto)
+}
+
+geraKNN <- function(treinoX, treinoY, testeX, teste, inicio, fim){
+  num = fim - inicio + 1
+  v = rep(0,num)
+  t = rep(0,num)
+  fp = rep(0,num)
+  fn = rep(0,num)
+  for(a in 1:num){
+    i = inicio + a - 1
+    set.seed(1)
+    resultados=knn(treinoX,testeX,treinoY,k=i)
+    
+    v[a] = i
+    mediaAux = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+    ##algo diferente tendo em conta aquilo q disse na analise
+    t[a] = mediaAux
+    
+    condicaoT <- resultados == teste
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
+    fp[a] = mediaAux
+    
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
+    fn[a] = mediaAux
+    
+  }
+  estrutura <- data.frame(v,t,fp,fn)
+}
+
+
+geraKNNCV <- function(treinoX, treinoY, inicio, fim){
+  num = fim - inicio + 1
+  v = rep(0,num)
+  t = rep(0,num)
+  fp = rep(0,num)
+  fn = rep(0,num)
+  for(a in 1:num){
+    i = inicio + a - 1
+    set.seed(1)
+    resultados = knn.cv(treino,treinoY,k=a)
+    
+    v[a] = i
+    mediaAux = mean(treinoY==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+    ##algo diferente tendo em conta aquilo q disse na analise
+    t[a] = mediaAux
+    
+    condicaoT <- resultados == treinoY
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(treinoY) & treinoY == 0])
+    fp[a] = mediaAux
+    
+    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(treinoY) & treinoY == 1])
+    fn[a] = mediaAux
+    
+  }
+  estrutura <- data.frame(v,t,fp,fn)
+}
+
+melhorIndice = function(dados){
+  data = dados
+  indice = -1
+  valor = 0
+  for(i in 1:dim(data)[1]){
+    valorAux = (2*data[i,2]) + data[i,3] + data[i,4]
+    
+    if(valorAux > valor){
+      valor = valorAux
+      indice = i
+    }
+  }
+  
+  resultado = data.frame(indice,valor)
+  
+}
+
+normaliza = function(dados){
+  data = dados
+  for(i in 1:dim(data)[2]){
+    if(class(data[,i])!="factor"){
+      data[,i] <- (data[,i] - min(data[,i], na.rm = TRUE)) / (max(data[,i],na.rm = TRUE)-min(data[,i],na.rm = TRUE))
+    }
+  }
+    
+  resultado = data
 }
