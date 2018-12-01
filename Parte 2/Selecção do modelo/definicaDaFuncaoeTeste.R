@@ -159,6 +159,85 @@ melhorIndice = function(dados){
   
 }
 
+glmCV = function(dados, formula, thr){
+  treino = dados[complete.cases(dados),]
+  
+  quantos = dim(treino)[1]/10
+  acerto = rep(0,quantos)
+  acertoP = rep(0,quantos)
+  acertoN = rep(0,quantos)
+  
+  for(a in 1:quantos){
+    teste = sample(length(treino),10)
+    dadosTeste = treino[teste, ]
+    treino = treino[-teste, ]
+    
+    if(a == 1){
+      
+      glm.fit = glm(formula, data=treino, family=binomial)
+      glm.probs=predict(glm.fit, newdata=dadosTeste, type="response")
+      resultados = ifelse(glm.probs > thr, 1, 0)
+      treinoY = dadosTeste[,1]
+      
+      mediaAux = mean(treinoY==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+      ##algo diferente tendo em conta aquilo q disse na analise
+      acerto[a] = mediaAux
+      
+      condicaoT <- resultados == treinoY
+      divide = length(resultados[!is.na(treinoY) & treinoY == 0])
+      if(divide == 0){
+        divide = 1
+      }
+      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+      
+      acertoN[a] = mediaAux
+      divide = length(resultados[!is.na(treinoY) & treinoY == 1])
+      if(divide == 0){
+        divide = 1
+      }
+      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+      
+      acertoP[a] = mediaAux
+      
+      jaUsados = dadosTeste
+    }
+    else{
+      paraTreinar =  rbind(treino,jaUsados)
+      glm.fit = glm(formula, data=paraTreinar, family=binomial)
+      glm.probs=predict(glm.fit, newdata=dadosTeste, type="response")
+      resultados = ifelse(glm.probs > thr, 1, 0)
+      treinoY = dadosTeste[,1]
+      
+      mediaAux = mean(treinoY==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
+      ##algo diferente tendo em conta aquilo q disse na analise
+      acerto[a] = mediaAux
+      
+      condicaoT <- resultados == treinoY
+      divide = length(resultados[!is.na(treinoY) & treinoY == 0])
+      if(divide == 0){
+        divide = 1
+      }
+      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+        
+      acertoN[a] = mediaAux
+      divide = length(resultados[!is.na(treinoY) & treinoY == 1])
+      if(divide == 0){
+        divide = 1
+      }
+      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+        
+      acertoP[a] = mediaAux
+      
+      jaUsados = rbind(jaUsados,dadosTeste)
+    }
+  }
+  acertoMedio = mean(acerto)
+  acertoMedioP = mean(acertoP)
+  acertoMedioN = mean(acertoN)
+  
+  data.frame(acertoMedio,acertoMedioP,acertoMedioN)
+}
+
 normaliza = function(dados){
   data = dados
   for(i in 1:dim(data)[2]){
