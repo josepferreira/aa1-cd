@@ -142,16 +142,16 @@ melhorIndice = function(dados){
   
 }
 
-glmCV = function(dados, formula, thr){
+glmCV = function(dados,formula,thr){
   treino = dados[complete.cases(dados),]
   
   quantos = dim(treino)[1]/10
-  acerto = rep(0,quantos)
-  acertoP = rep(0,quantos)
-  acertoN = rep(0,quantos)
+  acerto = rep(NA,quantos)
+  acertoP = rep(NA,quantos)
+  acertoN = rep(NA,quantos)
   
   for(a in 1:quantos){
-    teste = sample(length(treino),10)
+    teste = sample(dim(treino)[1],10)
     dadosTeste = treino[teste, ]
     treino = treino[-teste, ]
     
@@ -207,9 +207,9 @@ glmCV = function(dados, formula, thr){
       jaUsados = rbind(jaUsados,dadosTeste)
     }
   }
-  acertoMedio = mean(acerto)
-  acertoMedioP = mean(acertoP)
-  acertoMedioN = mean(acertoN)
+  acertoMedio = mean(acerto, na.rm = TRUE)
+  acertoMedioP = mean(acertoP, na.rm = TRUE)
+  acertoMedioN = mean(acertoN, na.rm = TRUE)
   
   data.frame(acertoMedio,acertoMedioP,acertoMedioN)
 }
