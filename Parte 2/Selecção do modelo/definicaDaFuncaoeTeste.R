@@ -1,39 +1,22 @@
-graficoThreshold <- function(inferior,superior,delta, fit, teste){
+graficoThreshold <- function(inferior,superior,delta, funcao, formula, dados){
   num = ((superior - inferior) / delta) + 2
   aux = 0
   auxT = 0
   comeco = inferior
   v = rep(0,num)
-  t = rep(0,num)
-  fp = rep(0,num)
-  fn = rep(0,num)
+  acerto = rep(0,num)
+  acertoP = rep(0,num)
+  acertoN = rep(0,num)
   
   for(a in 1: num){
     comeco = inferior + ((a-1)*delta)
-    resultados = rep(NA,183)
-    resultados[fit<=comeco] = 0
-    resultados[fit>comeco] = 1
-    
+    resultados = funcao(dados,formula,comeco)
     v[a] = comeco
-    mediaAux = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
-    ##algo diferente tendo em conta aquilo q disse na analise
-    t[a] = mediaAux
-    
-    condicaoT <- resultados == teste
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
-    fp[a] = mediaAux
-    
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
-    fn[a] = mediaAux
-    
-    
-    if(mediaAux > aux){
-      aux = mediaAux
-      auxT = comeco
-    }
-    
+    acerto[a] = resultados[1,1]
+    acertoP[a] = resultados[1,2]
+    acertoN[a] = resultados[1,3]
   }
-  estrutura <- data.frame(v,t,fp,fn)
+  estrutura <- data.frame(v,acerto,acertoP,acertoN)
 }
 
 melhorThreshold <- function(inferior,superior,delta, fit, teste){
@@ -185,20 +168,16 @@ glmCV = function(dados, formula, thr){
       
       condicaoT <- resultados == treinoY
       divide = length(resultados[!is.na(treinoY) & treinoY == 0])
-      if(divide == 0){
-        divide = 1
+      if(divide != 0){
+        mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+        acertoN[a] = mediaAux
       }
-      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
-      
-      acertoN[a] = mediaAux
       divide = length(resultados[!is.na(treinoY) & treinoY == 1])
-      if(divide == 0){
-        divide = 1
+      
+      if(divide!=0){
+        mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+        acertoP[a] = mediaAux
       }
-      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
-      
-      acertoP[a] = mediaAux
-      
       jaUsados = dadosTeste
     }
     else{
@@ -214,20 +193,17 @@ glmCV = function(dados, formula, thr){
       
       condicaoT <- resultados == treinoY
       divide = length(resultados[!is.na(treinoY) & treinoY == 0])
-      if(divide == 0){
-        divide = 1
-      }
-      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+      if(divide != 0){
+        mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
         
-      acertoN[a] = mediaAux
+        acertoN[a] = mediaAux
+      }
       divide = length(resultados[!is.na(treinoY) & treinoY == 1])
-      if(divide == 0){
-        divide = 1
-      }
-      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+      if(divide != 0){
+        mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
         
-      acertoP[a] = mediaAux
-      
+        acertoP[a] = mediaAux
+      }
       jaUsados = rbind(jaUsados,dadosTeste)
     }
   }
