@@ -1,0 +1,31 @@
+
+Estrutura da apresentação:
+
+Analise exploratória:
+
+Porque é que fizemos esta analise?
+
+Breve anaálise a olho das variavaeis
+
+RegSubsets
+
+----------------------------------------------
+
+Selecao do melhor modelo:
+Análise geral (cross validation (porque? instabilidade) logo)
+-> Cada um fala como escolheu o melhor modelo
+
+-----------------------------------------------
+-> Escolha do modelo vencedor entre os 3
+-> Divisao dos dados entre treino/teste
+-----------------------------------------------
+Resposta as perguntas
+
+-----------------------------------------------
+
+
+-------------------------------------
+|	 	   	            |
+|  	 STAB GLU                   |
+| VENCEDORA DO OSCAR MELHOR VARIAVEL|
+-------------------------------------
