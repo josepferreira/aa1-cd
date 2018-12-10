@@ -79,7 +79,7 @@ geraKNN <- function(treinoX, treinoY, testeX, teste, inicio, fim){
   for(a in 1:num){
     i = inicio + a - 1
     set.seed(1)
-    resultados=knn(treinoX,testeX,treinoY,k=i)
+    resultados=knn(data.frame(treinoX),data.frame(testeX),treinoY,k=i)
     
     v[a] = i
     mediaAux = mean(teste==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
@@ -87,11 +87,17 @@ geraKNN <- function(treinoX, treinoY, testeX, teste, inicio, fim){
     t[a] = mediaAux
     
     condicaoT <- resultados == teste
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(teste) & teste == 0])
-    fp[a] = mediaAux
+    divide = length(resultados[!is.na(teste) & teste == 0])
+    if(divide != 0){
+      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+      fn[a] = mediaAux
+    }
+    divide = length(resultados[!is.na(teste) & teste == 1])
     
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(teste) & teste == 1])
-    fn[a] = mediaAux
+    if(divide!=0){
+      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+      fp[a] = mediaAux
+    }
     
   }
   estrutura <- data.frame(v,t,fp,fn)
@@ -107,19 +113,26 @@ geraKNNCV <- function(treinoX, treinoY, inicio, fim){
   for(a in 1:num){
     i = inicio + a - 1
     set.seed(1)
-    resultados = knn.cv(treino,treinoY,k=a)
+    resultados = knn.cv(treino[,-1],treinoY,k=a)
     
+    v[a] = i
     v[a] = i
     mediaAux = mean(treinoY==resultados,na.rm=TRUE) ##aqui pode-se utilizar depois
     ##algo diferente tendo em conta aquilo q disse na analise
     t[a] = mediaAux
     
     condicaoT <- resultados == treinoY
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/length(resultados[!is.na(treinoY) & treinoY == 0])
-    fp[a] = mediaAux
+    divide = length(resultados[!is.na(treinoY) & treinoY == 0])
+    if(divide != 0){
+      mediaAux =length(resultados[!is.na(condicaoT) & condicaoT & resultados==0])/divide
+      fn[a] = mediaAux
+    }
+    divide = length(resultados[!is.na(treinoY) & treinoY == 1])
     
-    mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/length(resultados[!is.na(treinoY) & treinoY == 1])
-    fn[a] = mediaAux
+    if(divide!=0){
+      mediaAux = length(resultados[!is.na(condicaoT) & condicaoT & resultados==1])/divide
+      fp[a] = mediaAux
+    }
     
   }
   estrutura <- data.frame(v,t,fp,fn)
@@ -369,4 +382,17 @@ normaliza = function(dados){
   }
     
   resultado = data
+}
+
+consomeValores = function(dados){
+  indice = rep(NA,dim(dados)[1])
+  k = rep(NA,dim(dados)[1])
+  valor = rep(NA,dim(dados)[1])
+  for(i in 1:dim(dados)[1]){
+    indice[i] = dados[i,5]
+    k[i] = dados[i,1]
+    valor[i] = (2*dados[i,2]) + dados[i,3] + dados[i,4]
+  }
+  
+  data.frame(indice,k,valor)
 }
