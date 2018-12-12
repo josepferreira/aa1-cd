@@ -396,3 +396,10 @@ consomeValores = function(dados){
   
   data.frame(indice,k,valor)
 }
+
+transformaBinaria = function(dados){
+  binaria <- rep(NA,length(dados))
+  binaria[dados > 7] = 1
+  binaria[dados <= 7] = 0
+  binaria
+}
