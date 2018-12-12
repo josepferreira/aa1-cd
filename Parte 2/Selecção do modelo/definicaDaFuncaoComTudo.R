@@ -236,11 +236,13 @@ qdaCV = function(dados,fitFrom,thr){
   acertoN = rep(NA,quantos)
   
   for(a in 1:quantos){
+    set.seed(1)
     teste = sample(dim(treino)[1],10)
     dadosTeste = treino[teste, ]
     treino = treino[-teste, ]
     
     if(a == 1){
+      set.seed(1)
       qda.fit=qda(fitFrom,data=treino)
       qda.pred=predict(qda.fit,dadosTeste)
       resultadosAux = qda.pred$posterior[,2]
@@ -309,11 +311,13 @@ ldaCV = function(dados,fitFrom,thr){
   acertoN = rep(NA,quantos)
   
   for(a in 1:quantos){
+    set.seed(1)
     teste = sample(dim(treino)[1],10)
     dadosTeste = treino[teste, ]
     treino = treino[-teste, ]
     
     if(a == 1){
+      set.seed(1)
       qda.fit=lda(fitFrom,data=treino)
       qda.pred=predict(qda.fit,dadosTeste)
       resultadosAux = qda.pred$posterior[,2]
